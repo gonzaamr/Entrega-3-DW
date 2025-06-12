@@ -1,0 +1,41 @@
+        <div class="contenedor a">
+            <div class="titulo">
+                <h1>Ajedrez online</h1>
+                <div class="beneficio">
+                    <p>Ten batallas contra desconocido o tus amigos</p>
+                    <img src="/images/espadas.png" alt="Espadas cruzadas">
+                </div>
+                <div class="beneficio"> 
+                    <img src="/images/crecimento.png" alt="Gráfico de crecimiento">
+                    <p>Mejora tus habilidades</p>
+                </div>
+                <div class="beneficio">
+                    <p>Conviértete en el mejor</p>
+                    <img src="/images/corona.png" alt="Corona">
+                </div>
+                <p class="quienes"><a href="/desarrolladores">¿Quienes somos?</a></p>
+            </div>
+        </div>
+        <div class="contenedor b">
+            <form method="POST" action="/login">
+                <h1>Iniciar sesión</h1>
+                <div class="caja-input">
+                    <input type="username" placeholder="Usuario" name="username" required>
+                    <box-icon type='solid' name='user'></box-icon>
+                </div>
+                <div class="caja-input">
+                    <input type="password" placeholder="Contraseña" name="password"required>
+                    <box-icon name='lock-alt' type='solid'></box-icon>
+                </div>
+                <div class="recuerdame-olvidar">
+                    <label>
+                        <input type="checkbox"> Recuerdame
+                    </label>
+                    <a href="#">¿Olvidaste tu contraseña?</a>
+                </div>
+                <button type="submit" class="btn" >Iniciar sesión</button>
+                <div class="link-registro">
+                    <p>¿No tienes cuenta? <a href="/register">Registro</a></p>
+                </div>
+            </form>
+        </div>

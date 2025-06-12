@@ -1,0 +1,216 @@
+    <body> 
+        <input type="radio" name="vista" id="inicio" checked>
+        <input type="radio" name="vista" id="nueva-partida">
+        <input type="radio" name="vista" id="en-curso">
+        <input type="radio" name="vista" id="partidas-publicas">
+        <input type="radio" name="vista" id="historial">
+        <input type="radio" name="vista" id="estadisticas">
+        <div class="titulo_pp">
+            <h1>Inicio</h1>  
+        </div>
+        <div class="contenedor_pp categorias"> 
+            <label for="nueva-partida" class="boton">
+                <span class="box-container"> <!-- Contenedor adicional -->
+                    <span class="box">
+                        <img src="/images/peon.png" class="item" alt="Nueva partida">
+                        <span>Jugar</span>
+                    </span>  
+                </span>
+            </label>
+            <label for="en-curso" class="boton">
+                <span class="box-container"> <!-- Contenedor adicional -->
+                    <span class="box">
+                        <img src="/images/reloj-arena.png" class="item" alt="Partidas en curso">
+                        <span>Partidas en curso</span>
+                    </span>  
+                </span>
+            </label>
+            <label for="partidas-publicas" class="boton">
+                <span class="box-container"> <!-- Contenedor adicional -->
+                    <span class="box">
+                        <img src="/images/punto-de-partida.png" class="item" alt="Partidas publicas">
+                        <span>Partidas publicas</span>
+                    </span>  
+                </span>
+            </label>
+            <label for="historial" class="boton">
+                <span class="box-container"> <!-- Contenedor adicional -->
+                    <span class="box">
+                        <img src="/images/reloj.png" class="item" alt="Historial">
+                        <span>Historial</span>
+                    </span>  
+                </span>
+            </label>
+            <label for="estadisticas" class="boton">
+                <span class="box-container"> <!-- Contenedor adicional -->
+                    <span class="box">
+                        <img src="/images/estadistica.png" class="item" alt="Estadísticas">
+                        <span>Estadísticas</span>
+                    </span>  
+                </span>
+            </label>
+            <label class="boton">
+                <a href="/perfil" class="box">
+                    <img src="/images/perfil.png" class="item" alt="Perfil"> 
+                    <span>Perfil</span>
+                </a>  
+            </label>
+        </div> 
+        <div class="contenedor_pp detalle partida">
+            <label class="boton volver" for="inicio">⬅ Volver</label>
+            <h1>Partida</h1>
+            <img src="/images/peon.png" class="itemdetalle" alt="Iniciar">
+            <a href="/partida" class="iniciar">Iniciar nueva partida</a>
+        </div>
+        <div class="contenedor_pp detalle curso">
+            <label class="boton volver" for="inicio">⬅ Volver</label>
+            <h1>Partidas en curso</h1>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr> 
+                            <th>Jugador</th>
+                            <th>Movimientos</th>
+                            <th>Inicio</th>
+                            <th>Entrar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Monserrat</td>
+                            <td>12</td>
+                            <td>3/12/24</td>
+                            <td><button class="jugar">Jugar</button></td>
+                        </tr>
+                        <tr>
+                            <td>Ana</td>
+                            <td>10</td>
+                            <td>5/1/2025</td>
+                            <td><button class="jugar">Jugar</button></td>
+                        </tr>
+                        <tr>
+                            <td>Luis</td>
+                            <td>8</td>
+                            <td>5/1/2025</td>
+                            <td><button class="jugar">Jugar</button></td>
+                        </tr>
+                        <tr>
+                            <td>Marta</td>
+                            <td>6</td>
+                            <td>9/2/2025</td>
+                            <td><button class="jugar">Jugar</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="contenedor_pp detalle publica">
+            <label class="boton volver" for="inicio">⬅ Volver</label>
+            <h1>Partidas disponibles</h1>
+            <div class="partidas">
+                <div class="carrousel">
+                    <article class="card_pp">
+                        <h2>Pepito</h2>
+                        <button> Jugar</button>
+                    </article>
+                    <article class="card_pp">
+                        <h2>Juana</h2>
+                        <button> Jugar</button>
+                    </article>
+                    <article class="card_pp">
+                        <h2>Andrés</h2>
+                        <button> Jugar</button>
+                    </article>
+                    <article class="card_pp">
+                        <h2>Ronaldo</h2>
+                        <button> Jugar</button>
+                    </article>
+                    <article class="card_pp">
+                        <h2>Diego</h2>
+                        <button> Jugar</button>
+                    </article>
+                </div>
+            </div>
+        </div>
+        <div class="contenedor_pp detalle historial">
+            <label class="boton volver" for="inicio">⬅ Volver</label>
+            <h1>Historial</h1>
+            <div class="table-container">
+                <table>
+                    <thead> 
+                        <tr>
+                            <th>Contrincante</th>
+                            <th>Resultado</th>
+                            <th>Puntaje</th>
+                            <th>Movimientos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Gonzalo</td>
+                            <td>Derrota</td>
+                            <td>0-1</td>
+                            <td>52</td>
+                        </tr>
+                        <tr>
+                            <td>Alonso</td>
+                            <td>Victoria</td>
+                            <td>1-0</td>
+                            <td>43</td>
+                        </tr>
+                        <tr>
+                            <td>Nutrin</td>
+                            <td>Derrota</td>
+                            <td>0-1</td>
+                            <td>66</td>
+                        </tr>
+                        <tr>
+                            <td>Nutrion</td>
+                            <td>Empate</td>
+                            <td>1/2 - 1/2</td>
+                            <td>78</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="contenedor_pp detalle estadisticas">
+            <label class="boton volver" for="inicio">⬅ Volver</label>
+            <h1>Estadísticas</h1>
+            <div class="contenedor-estadisticas">
+                <div class="est">
+                    <h3>Victorias</h3>
+                    <h1>1</h1>
+                </div>  
+                <div class="est">
+                    <h3>Empates</h3>
+                    <h1>1</h1>
+                </div>  
+                <div class="est">
+                    <h3>Derrotas</h3>
+                    <h1>2</h1>
+                </div>  
+                <div class="est">
+                    <h3>Partidas</h3>
+                    <h1>4</h1>
+                </div>  
+                <div class="est">
+                    <h3>Movimientos</h3>
+                    <h1>239</h1>
+                </div>  
+                <div class="est">
+                    <h3>Rango</h3>
+                    <h1>1427</h1>
+                </div>  
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const botonPartida = document.querySelector(".iniciar");
+
+                if (localStorage.getItem("estadoAjedrez")) {
+                    botonPartida.textContent = "Seguir jugando";
+                }
+            });
+        </script>
+    </body>

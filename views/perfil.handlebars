@@ -1,0 +1,118 @@
+    <body class="perfil">
+        <div class="contenedor_perfil">
+            <div class="izquierda">
+                <div class="datos_perfil">
+                    <div class="foto">
+                        <input type="file" id="fileInput" accept="image/*">
+                        <h1>{{username}}</h1>
+                    </div>
+                    <div class="opciones">
+                        <ul>
+                            <li><a href="/pp">Jugar</a></li>
+                            <li>        
+                                <label for="edicion" style="cursor: pointer;">Configuración</label>
+                            </li>
+                                
+                            <li><a href="/historia">Historia y reglas</a></li>
+                        </ul>
+                    </div>
+                    <div class="cerrar">        
+                        <a href="/logout"><p>cerrar sesion</p></a>
+                    </div>
+                </div>
+            </div>
+            <div class="derecha">         
+                <form action="#">
+                    <input type="radio" name="vista" id="visualizacion" checked>
+                    <input type="radio" name="vista" id="edicion">
+                    <div class="arriba modo-visualizacion">
+                        <div class="caja nickname">{{username}}</div> 
+                        <div class="caja nombre_perfil">{{nombre}} {{apellido}}</div> 
+                        <div class="fila-tercera"> 
+                            <div class="caja mail">{{mail}}</div>
+                            <div class="caja contraseña">*********</div>
+                        </div>
+                    </div>
+                    <div class="arriba modo-edicion">
+                        <input type="text" class="caja nickname" placeholder="{{username}}">
+                        <input type="text" class="caja nombre_perfil" placeholder="{{nombre}} {{apellido}}">
+                        <div class="fila-tercera">
+                            <input type="email" class="caja mail" placeholder="{{mail}}">
+                            <input type="password" class="caja contraseña" placeholder="*********">
+                        </div>
+                    </div>
+                    <button type="submit" hidden formaction="#visualizacion"></button>
+                    <button type="reset" hidden></button>
+                </form>
+                <div class="abajo">
+                    <div class="amigos">
+                        <h1>Amigos</h1>
+                        <div class="card_perfil">
+                            <div class="if">
+                                <img src="/images/foto-perfil.webp" class="itemdetalle" alt="foto-perfil">
+                            </div>
+                            <div class="dd">
+                                <h1>Julian</h1>
+                                <h2>1563 pts</h2>
+                            </div>
+                        </div>
+                        <div class="card_perfil">
+                            <div class="if">
+                                <img src="/images/foto-perfil.webp" class="itemdetalle" alt="foto-perfil">
+                            </div>
+                            <div class="dd">
+                                <h1>Pedro</h1>
+                                <h2>1641 pts</h2>
+                            </div>
+                        </div>           
+                    </div>
+                    <div class="elo">
+                        <div class="puntos">
+                            <h1>1427 pts.</h1>
+                        </div>
+                        <div class="f">
+                            <img src="/images/peon.png" class="foto-elo" alt="Foto de elo">
+                        </div>
+                        <div class="rango">
+                            <h1>Peón</h1>
+                        </div>
+                    </div>
+                    <div class="historial_perfil">
+                        <div class="table-container tp">
+                            <table class="tp"> 
+                                <thead> 
+                                    <tr class="tp">
+                                        <th class="tp">Contrincante</th>
+                                        <th class="tp">Resultado</th>
+                                        <th class="tp">Puntaje</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="tp">
+                                        <td class="tp">Gonzalo</td>
+                                        <td class="tp">Derrota</td>
+                                        <td class="tp">0-1</td>
+                                    </tr>
+                                    <tr class="tp">
+                                        <td class="tp">Alonso</td>
+                                        <td class="tp">Victoria</td>
+                                        <td class="tp">1-0</td>
+                                    </tr>
+                                    <tr class="tp">
+                                        <td class="tp">Nutrin</td>
+                                        <td class="tp">Derrota</td>
+                                        <td class="tp">0-1</td>
+                                    </tr>
+                                    <tr class="tp">
+                                        <td class="tp">Nutrion</td>
+                                        <td class="tp">Empate</td>
+                                        <td class="tp">1/2 - 1/2</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
