@@ -74,11 +74,63 @@ app.post('/login', async (req, res) => {
   res.redirect('/pp')
 });
 
-app.get('/pp', authMiddleware, (req, res) => {
-  res.render('pp', {
-    script: '<script src="/js/tablero.js"></script>',
-    username: req.cookies.username
+app.get('/pp', authMiddleware, async (req, res) => {
+  const usuarioId = req.cookies.usuario_id;
+  res.render('pp', { Partida, usuarioId });
+}); 
+
+app.get('/api/info-partidas', authMiddleware, async (req, res) => {
+  const usuarioId = req.cookies.usuario_id;
+  const partidas = await Partida.find({
+    $or: [{ jugador1: usuarioId }, { jugador2: usuarioId }]
+  }).populate('jugador1 jugador2');
+  res.json(partidas);    
+});
+
+app.get('/api/partida/:id', authMiddleware, async (req, res) => {
+  const partidaId = req.params.id;
+  const partida = await Partida.findById(partidaId).populate('jugador1 jugador2');
+  
+  if (!partida) {
+    return res.status(404).send('Partida no encontrada');
+  }
+
+  res.json(partida);
+});
+
+app.post('/api/crear-partida', authMiddleware, async (req, res) => {
+  const usuarioId = req.cookies.usuario_id;
+  const partida = await Partida.create({
+    jugador1 : usuarioId,
+    resultado: 'esperando_oponente'
   });
+  res.json({ partidaId: partida._id });
+});
+
+app.patch('/api/unirse-partida/:id', authMiddleware, async (req, res) => {
+  const partidaId = req.params.id;
+  const usuarioId = req.cookies.usuario_id;
+
+  const partida = await Partida.findById(partidaId);
+  if (!partida) {
+    return res.status(404).send('Partida no encontrada');
+  }
+
+  if (partida.jugador2) {
+    return res.status(400).send('La partida ya tiene un oponente');
+  }
+
+  partida.jugador2 = usuarioId;
+  partida.resultado = 'en_curso';
+  await partida.save();
+
+  res.redirect(`/partida/${partida._id}`);
+})
+
+app.delete('/api/borrar-partida/:id', authMiddleware, async (req, res) => {
+  const partidaId = req.params.id; 
+  await Partida.findByIdAndDelete(partidaId);
+  res.status(204).send();
 });
 
 app.get('/partida',authMiddleware, (req, res)=>{
@@ -88,20 +140,32 @@ app.get('/partida',authMiddleware, (req, res)=>{
   });
 });
 
-
 app.get('/desarrolladores', (req, res)=>{
   res.render('desarrolladores');
 });
 
-app.get('/perfil',authMiddleware ,(req, res)=>{
-  const usuario = req.cookies.username;
-  res.render('perfil',{
-    username: usuario.username,
-    nombre: usuario.nombre,
-    apellido: usuario.apellido,
-    mail: usuario.mail
-  });
+app.get('/perfil', authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = req.cookies.usuario_id;
+    const usuario = await Usuario.findById(usuarioId);
+
+    if (!usuario) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    res.render('perfil', {
+      username: usuario.username,
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      mail: usuario.mail
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al cargar el perfil');
+  }
 });
+
 
 app.get('/logout', (req, res) => {
   res.clearCookie('username');

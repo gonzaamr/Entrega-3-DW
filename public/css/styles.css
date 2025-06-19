@@ -472,10 +472,12 @@ tr:hover {
   background-color: #00000028;
 }
 
-.table-container{
-  margin-left: 3%;
-  overflow: auto;
-  margin-bottom: 20px;
+.table-container {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;;
 }
 
 .jugar{

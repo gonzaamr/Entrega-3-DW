@@ -1,14 +1,46 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+
+// Subesquema para una pieza del tablero
+const PiezaSchema = new mongoose.Schema({
+  icono: { type: String, required: true },
+  fila: { type: Number, required: true },
+  col: { type: Number, required: true },
+  color: { type: String, enum: ['blanca', 'negra'], required: true }
+}, { _id: false }); // No necesitamos un _id por cada pieza
 
 const PartidaSchema = new mongoose.Schema({
   jugador1: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
-  jugador2: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+  jugador2: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', default: null },
   fechaInicio: { type: Date, default: Date.now },
   resultado: {
     type: String,
-    enum: ['jugador1', 'jugador2', 'empate', 'en_curso'],
+    enum: ['jugador1', 'jugador2', 'empate', 'en_curso', 'esperando_oponente'],
     default: 'en_curso'
+  },
+  tablero: {
+    type: [PiezaSchema],
+    default: () => [
+      // Piezas blancas
+      { icono: "♜", fila: 0, col: 0, color: "blanca" }, { icono: "♞", fila: 0, col: 1, color: "blanca" },
+      { icono: "♝", fila: 0, col: 2, color: "blanca" }, { icono: "♛", fila: 0, col: 3, color: "blanca" },
+      { icono: "♚", fila: 0, col: 4, color: "blanca" }, { icono: "♝", fila: 0, col: 5, color: "blanca" },
+      { icono: "♞", fila: 0, col: 6, color: "blanca" }, { icono: "♜", fila: 0, col: 7, color: "blanca" },
+      { icono: "♟", fila: 1, col: 0, color: "blanca" }, { icono: "♟", fila: 1, col: 1, color: "blanca" },
+      { icono: "♟", fila: 1, col: 2, color: "blanca" }, { icono: "♟", fila: 1, col: 3, color: "blanca" },
+      { icono: "♟", fila: 1, col: 4, color: "blanca" }, { icono: "♟", fila: 1, col: 5, color: "blanca" },
+      { icono: "♟", fila: 1, col: 6, color: "blanca" }, { icono: "♟", fila: 1, col: 7, color: "blanca" },
+      // Piezas negras
+      { icono: "♜", fila: 7, col: 0, color: "negra" }, { icono: "♞", fila: 7, col: 1, color: "negra" },
+      { icono: "♝", fila: 7, col: 2, color: "negra" }, { icono: "♛", fila: 7, col: 3, color: "negra" },
+      { icono: "♚", fila: 7, col: 4, color: "negra" }, { icono: "♝", fila: 7, col: 5, color: "negra" },
+      { icono: "♞", fila: 7, col: 6, color: "negra" }, { icono: "♜", fila: 7, col: 7, color: "negra" },
+      { icono: "♟", fila: 6, col: 0, color: "negra" }, { icono: "♟", fila: 6, col: 1, color: "negra" },
+      { icono: "♟", fila: 6, col: 2, color: "negra" }, { icono: "♟", fila: 6, col: 3, color: "negra" },
+      { icono: "♟", fila: 6, col: 4, color: "negra" }, { icono: "♟", fila: 6, col: 5, color: "negra" },
+      { icono: "♟", fila: 6, col: 6, color: "negra" }, { icono: "♟", fila: 6, col: 7, color: "negra" }
+    ]
   }
-})
+});
 
-module.exports  = mongoose.model('Partida', PartidaSchema)
+module.exports = mongoose.model('Partida', PartidaSchema);
+
