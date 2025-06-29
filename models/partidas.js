@@ -21,25 +21,26 @@ const PartidaSchema = new mongoose.Schema({
     type: [PiezaSchema],
     default: () => [
       // Piezas blancas
-      { icono: "♜", fila: 0, col: 0, color: "blanca" }, { icono: "♞", fila: 0, col: 1, color: "blanca" },
-      { icono: "♝", fila: 0, col: 2, color: "blanca" }, { icono: "♛", fila: 0, col: 3, color: "blanca" },
-      { icono: "♚", fila: 0, col: 4, color: "blanca" }, { icono: "♝", fila: 0, col: 5, color: "blanca" },
-      { icono: "♞", fila: 0, col: 6, color: "blanca" }, { icono: "♜", fila: 0, col: 7, color: "blanca" },
-      { icono: "♟", fila: 1, col: 0, color: "blanca" }, { icono: "♟", fila: 1, col: 1, color: "blanca" },
-      { icono: "♟", fila: 1, col: 2, color: "blanca" }, { icono: "♟", fila: 1, col: 3, color: "blanca" },
-      { icono: "♟", fila: 1, col: 4, color: "blanca" }, { icono: "♟", fila: 1, col: 5, color: "blanca" },
-      { icono: "♟", fila: 1, col: 6, color: "blanca" }, { icono: "♟", fila: 1, col: 7, color: "blanca" },
+      { icono: "♜", fila: 0, col: 0, color: "negra" }, { icono: "♞", fila: 0, col: 1, color: "negra" },
+      { icono: "♝", fila: 0, col: 2, color: "negra" }, { icono: "♛", fila: 0, col: 3, color: "negra" },
+      { icono: "♚", fila: 0, col: 4, color: "negra" }, { icono: "♝", fila: 0, col: 5, color: "negra" },
+      { icono: "♞", fila: 0, col: 6, color: "negra" }, { icono: "♜", fila: 0, col: 7, color: "negra" },
+      { icono: "♟", fila: 1, col: 0, color: "negra" }, { icono: "♟", fila: 1, col: 1, color: "negra" },
+      { icono: "♟", fila: 1, col: 2, color: "negra" }, { icono: "♟", fila: 1, col: 3, color: "negra" },
+      { icono: "♟", fila: 1, col: 4, color: "negra" }, { icono: "♟", fila: 1, col: 5, color: "negra" },
+      { icono: "♟", fila: 1, col: 6, color: "negra" }, { icono: "♟", fila: 1, col: 7, color: "negra" },
       // Piezas negras
-      { icono: "♜", fila: 7, col: 0, color: "negra" }, { icono: "♞", fila: 7, col: 1, color: "negra" },
-      { icono: "♝", fila: 7, col: 2, color: "negra" }, { icono: "♛", fila: 7, col: 3, color: "negra" },
-      { icono: "♚", fila: 7, col: 4, color: "negra" }, { icono: "♝", fila: 7, col: 5, color: "negra" },
-      { icono: "♞", fila: 7, col: 6, color: "negra" }, { icono: "♜", fila: 7, col: 7, color: "negra" },
-      { icono: "♟", fila: 6, col: 0, color: "negra" }, { icono: "♟", fila: 6, col: 1, color: "negra" },
-      { icono: "♟", fila: 6, col: 2, color: "negra" }, { icono: "♟", fila: 6, col: 3, color: "negra" },
-      { icono: "♟", fila: 6, col: 4, color: "negra" }, { icono: "♟", fila: 6, col: 5, color: "negra" },
-      { icono: "♟", fila: 6, col: 6, color: "negra" }, { icono: "♟", fila: 6, col: 7, color: "negra" }
+      { icono: "♜", fila: 7, col: 0, color: "blanca" }, { icono: "♞", fila: 7, col: 1, color: "blanca" },
+      { icono: "♝", fila: 7, col: 2, color: "blanca" }, { icono: "♛", fila: 7, col: 3, color: "blanca" },
+      { icono: "♚", fila: 7, col: 4, color: "blanca" }, { icono: "♝", fila: 7, col: 5, color: "blanca" },
+      { icono: "♞", fila: 7, col: 6, color: "blanca" }, { icono: "♜", fila: 7, col: 7, color: "blanca" },
+      { icono: "♟", fila: 6, col: 0, color: "blanca" }, { icono: "♟", fila: 6, col: 1, color: "blanca" },
+      { icono: "♟", fila: 6, col: 2, color: "blanca" }, { icono: "♟", fila: 6, col: 3, color: "blanca" },
+      { icono: "♟", fila: 6, col: 4, color: "blanca" }, { icono: "♟", fila: 6, col: 5, color: "blanca" },
+      { icono: "♟", fila: 6, col: 6, color: "blanca" }, { icono: "♟", fila: 6, col: 7, color: "blanca" }
     ]
-  }
+  },
+  cantidadMovimientos: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('Partida', PartidaSchema);

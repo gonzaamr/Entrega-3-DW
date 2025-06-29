@@ -16,6 +16,7 @@ app.set('views', './views');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(express.json());
 
 mongoose.connect('mongodb+srv://gonzalomorales1:db_password@cluster0.8fvbx8v.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
   useNewUrlParser: true,
@@ -126,6 +127,31 @@ app.patch('/api/unirse-partida/:id', authMiddleware, async (req, res) => {
 
   res.redirect(`/partida/${partida._id}`);
 })
+
+// PATCH porque estamos actualizando parcialmente (solo el tablero)
+app.patch('/api/partida/:id', async (req, res) => {
+  const { id } = req.params;
+  const { tablero } = req.body;
+
+  if (!Array.isArray(tablero)) {
+    return res.status(400).json({ error: 'Formato de tablero inválido' });
+  }
+
+  try {
+    const partida = await Partida.findByIdAndUpdate(
+      id,
+      { tablero: tablero },
+      { new: true }
+    );
+    if (!partida) return res.status(404).json({ error: 'Partida no encontrada' });
+
+    res.json({ mensaje: 'Tablero actualizado con éxito' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error del servidor al actualizar la partida' });
+  }
+});
+
 
 app.delete('/api/borrar-partida/:id', authMiddleware, async (req, res) => {
   const partidaId = req.params.id; 
