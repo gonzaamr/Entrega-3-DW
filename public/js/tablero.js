@@ -196,6 +196,10 @@ function juego(piezasIniciales, cookie, info) {
         pieza.id = `pieza-${fila}-${col}`;
         pieza.style.color = piezaData.color === "blanca" ? "white" : "black";
           pieza.addEventListener("dragstart", e => {
+            if(info.resultado !== "en_curso") {
+              e.preventDefault();
+              return;
+            }
           const colorCSS = getComputedStyle(pieza).color;
           const colorPieza = colorCSS === 'rgb(255, 255, 255)' ? 'blanca' : 'negra';
           const miColor = cookie === info.jugador1.usuario  ? info.jugador1.color : info.jugador2.color;
@@ -214,6 +218,48 @@ function juego(piezasIniciales, cookie, info) {
     }
   }
 }
+
+const invitarBtn = document.getElementById("invitar");
+invitarBtn.addEventListener("click", () => {
+  const invitacion = document.createElement("input");
+  invitacion.type = "email"; // mejor usar "email" que "mail"
+  invitacion.placeholder = "Correo del oponente";
+  invitacion.classList.add("invitacion");
+
+  const enviarBtn = document.createElement("button");
+  enviarBtn.textContent = "Enviar invitación";
+  enviarBtn.classList.add("enviar-invitacion");
+
+  enviarBtn.addEventListener("click", async () => {
+    const email = invitacion.value;
+    if (!email) {
+      alert("Por favor, ingresa un correo electrónico.");
+      return;
+    }
+    try {
+      const res = await fetch('/api/invitar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, partidaId: getIdFromUrl() })
+      });
+
+      if (!res.ok) {
+        throw new Error('Error al enviar la invitación');
+      }
+      alert("Invitación enviada correctamente.");
+      invitacion.remove();
+      enviarBtn.remove();
+    } catch (error) {
+      console.error('Error al enviar la invitación:', error);
+      alert("Error al enviar la invitación. Inténtalo de nuevo.");
+    }
+  });
+
+  // Agregar al DOM, por ejemplo en el body o en un contenedor
+  document.body.appendChild(invitacion);
+  document.body.appendChild(enviarBtn);
+});
+
 
 setInterval(() => {
       cargarInfoPartida();

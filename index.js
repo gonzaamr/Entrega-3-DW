@@ -91,7 +91,7 @@ app.get('/api/info-partidas', authMiddleware, async (req, res) => {
       ]
     }).populate('jugador1.usuario jugador2.usuario');
 
-    res.json(partidas);
+    res.json({partidas, usuarioId});
   } catch (err) {
     console.error('Error en /api/info-partidas:', err);
     res.status(500).json({ error: 'Error interno al obtener las partidas' });
@@ -110,6 +110,55 @@ app.get('/api/partida/:id', authMiddleware, async (req, res) => {
 
   res.json({partida, usuarioId});
 });
+
+app.post('/api/invitar', authMiddleware, async (req, res) => {
+  const { email, partidaId } = req.body;
+  const jugador1Id = req.cookies.usuario_id;
+
+  try {
+    if (!email || !partidaId) {
+      return res.status(400).json({ error: "Faltan datos requeridos" });
+    }
+
+    const usuarioInvitado = await Usuario.findOne({ mail: email });
+    if (!usuarioInvitado) {
+      return res.status(404).json({ error: "Usuario invitado no encontrado" });
+    }
+
+    const partida = await Partida.findById(partidaId);
+    if (!partida) {
+      return res.status(404).json({ error: "Partida no encontrada" });
+    }
+
+    if (partida.jugador1.usuario.toString() !== jugador1Id) {
+      return res.status(403).json({ error: "No eres el creador de esta partida" });
+    }
+
+    if (partida.jugador2) {
+      return res.status(400).json({ error: "La partida ya tiene un oponente" });
+    }
+
+    const colorJugador1 = partida.jugador1.color;
+    const colorJugador2 = colorJugador1 === "blanca" ? "negra" : "blanca";
+
+    partida.jugador2 = {
+      usuario: usuarioInvitado._id,
+      color: colorJugador2
+    };
+
+    partida.resultado = "esperando_oponente";
+
+    await partida.save();
+
+    res.json({ mensaje: "Invitación enviada", jugador2: partida.jugador2 });
+
+  } catch (error) {
+    console.error("Error al invitar al jugador:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+
 
 app.post('/api/crear-partida', authMiddleware, async (req, res) => {
   try {
@@ -136,46 +185,42 @@ app.post('/api/crear-partida', authMiddleware, async (req, res) => {
   }
 });
 
-app.patch('/api/unirse-partida/:id', authMiddleware, async (req, res) => {
-  const partidaId = req.params.id;
-  const usuarioId = req.cookies.usuario_id;
-
-  const partida = await Partida.findById(partidaId);
-  if (!partida) {
-    return res.status(404).send('Partida no encontrada');
-  }
-
-  if (partida.jugador2) {
-    return res.status(400).send('La partida ya tiene un oponente');
-  }
-
-  partida.jugador2 = usuarioId;
-  partida.resultado = 'en_curso';
-  await partida.save();
-
-  res.redirect(`/partida/${partida._id}`);
-})
-
-// PATCH porque estamos actualizando parcialmente (solo el tablero)
 app.patch('/api/partida/:id', async (req, res) => {
   const { id } = req.params;
-  const { tablero, Movimientos } = req.body; // 👈 extraemos también movimientos
+  const { tablero, Movimientos, resultado } = req.body;
 
-  if (!Array.isArray(tablero)) {
-    return res.status(400).json({ error: 'Formato de tablero inválido' });
+  const updateFields = {};
+
+  // Solo agregamos los campos que estén presentes y válidos
+  if (Array.isArray(tablero)) {
+    updateFields.tablero = tablero;
+  }
+  if (Array.isArray(Movimientos)) {
+    updateFields.Movimientos = Movimientos;
+  }
+  if (typeof resultado === 'string') {
+    updateFields.resultado = resultado;
+  }
+
+  // Si no hay ningún campo para actualizar
+  if (Object.keys(updateFields).length === 0) {
+    return res.status(400).json({ error: 'No se proporcionaron campos válidos para actualizar' });
   }
 
   try {
     const partida = await Partida.findByIdAndUpdate(
       id,
-      { tablero, Movimientos }, // 👈 actualizamos ambos
+      updateFields,
       { new: true }
     );
-    if (!partida) return res.status(404).json({ error: 'Partida no encontrada' });
+
+    if (!partida) {
+      return res.status(404).json({ error: 'Partida no encontrada' });
+    }
 
     res.json({ mensaje: 'Partida actualizada con éxito' });
   } catch (error) {
-    console.error(error);
+    console.error('Error al actualizar partida:', error);
     res.status(500).json({ error: 'Error del servidor al actualizar la partida' });
   }
 });

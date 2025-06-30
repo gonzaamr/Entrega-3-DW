@@ -24,6 +24,7 @@
         <div class="acciones">
             <button id="rendirse" >Rendirse</button>
             <button id="empatar" >Empatar</button>
+            <button id="invitar" >Invitar</button>
         </div>
       </div>
     </main>
@@ -42,67 +43,5 @@
         <div id="bandeja-blancas"></div>
       </div>
   </div>
-  <script>
-    function insertarBotonInvitacion(partidaId) {
-  const acciones = document.querySelector(".acciones");
-  if (!acciones) return;
 
-  // Evita duplicar el botón
-  if (document.querySelector(".contenedor-invitacion")) return;
-
-  const contenedor = document.createElement("div");
-  contenedor.className = "contenedor-invitacion";
-
-  const botonMostrar = document.createElement("button");
-  botonMostrar.textContent = "📨 Invitar a un jugador";
-  botonMostrar.className = "boton-invitacion";
-
-  const form = document.createElement("div");
-  form.className = "formulario-invitacion";
-  form.style.display = "none";
-
-  const input = document.createElement("input");
-  input.type = "email";
-  input.placeholder = "Correo del jugador";
-  input.id = "correo-invitado";
-
-  const botonEnviar = document.createElement("button");
-  botonEnviar.textContent = "Enviar";
-  botonEnviar.className = "boton-enviar-invitacion";
-
-  botonMostrar.onclick = () => {
-    form.style.display = form.style.display === "none" ? "flex" : "none";
-  };
-
-  botonEnviar.onclick = async () => {
-    const correo = input.value.trim();
-    if (!correo) return alert("Ingresa un correo válido");
-
-    try {
-      const res = await fetch("/api/invitar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo, partidaId })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert("Invitación enviada");
-      } else {
-        alert("Error: " + data.error);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error al enviar la invitación");
-    }
-  };
-
-  form.appendChild(input);
-  form.appendChild(botonEnviar);
-
-  contenedor.appendChild(botonMostrar);
-  contenedor.appendChild(form);
-  acciones.appendChild(contenedor);
-}
-  </script>
 </body>

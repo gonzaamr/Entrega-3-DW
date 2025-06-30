@@ -85,29 +85,9 @@
     </div>
     <div class="contenedor_pp detalle publica">
         <label class="boton volver" for="inicio">⬅ Volver</label>
-        <h1>Partidas disponibles</h1>
+        <h1>Invitaciones</h1>
         <div class="partidas">
             <div class="carrousel">
-                <article class="card_pp">
-                    <h2>Pepito</h2>
-                    <button> Jugar</button>
-                </article>
-                <article class="card_pp">
-                    <h2>Juana</h2>
-                    <button> Jugar</button>
-                </article>
-                <article class="card_pp">
-                    <h2>Andrés</h2>
-                    <button> Jugar</button>
-                </article>
-                <article class="card_pp">
-                    <h2>Ronaldo</h2>
-                    <button> Jugar</button>
-                </article>
-                <article class="card_pp">
-                    <h2>Diego</h2>
-                    <button> Jugar</button>
-                </article>
             </div>
         </div>
     </div>
@@ -161,21 +141,20 @@
         </div>
     </div>
     <script>
-        async function partidas(){
-            try{
+        async function partidas() {
+            try {
                 const res = await fetch('/api/info-partidas');
                 if (!res.ok) {
-                    throw new Error('Error al obtener las partidas');
+                throw new Error('Error al obtener las partidas');
                 }
 
                 const data = await res.json();
-                console.log('Partidas obtenidas:', data);
-                mostrarPartidas(data);
-            }
-            catch (error){
+                mostrarPartidas(data.partidas, data.usuarioId);
+            } catch (error) {
                 console.error('Error al obtener las partidas:', error);
             }
         }
+
 
         async function crearNuevaPartida(colorElegido) {
             try {
@@ -196,8 +175,6 @@
                 console.error('Error al crear la partida:', error);
             }
         }
-
-
 
         document.querySelector('.online').addEventListener('click', () => {
             document.querySelector(".partida").textContent = "";
@@ -230,39 +207,84 @@
         });
 
 
-        function mostrarPartidas(partidas) {  
-            for (const partida of partidas) {
-                const jugador = partida.jugador2 && partida.jugador2.usuario ? partida.jugador2.usuario.username : 'Esperando oponente';
-                const movimientos = partida.Movimientos ? partida.Movimientos.length : '-';
-                const fecha = new Date(partida.fechaInicio).toLocaleDateString();
-                const tr = document.createElement('tr');
-                let tbody;
-                if (partida.resultado === 'en_curso' || partida.resultado === 'esperando_oponente') {
-                    tbody = document.querySelector('.curso tbody');
-                    tr.innerHTML = `
-                        <td>${jugador}</td>
-                        <td>${movimientos}</td>
-                        <td>${fecha}</td>
-                        <td><button class="jugar" data-id="${partida._id}">Jugar</button></td>
-                    `;   
-                }else{
-                    tbody = document.querySelector('.historial tbody');
-                    tr.innerHTML = `
-                        <td>${jugador}</td>
-                        <td>${partida.resultado}</td>
-                        <button>${movimientos}</button>
-                    `; 
-                }   
-                tbody.appendChild(tr);
+function mostrarPartidas(partidas, usuarioId) {
+  for (const partida of partidas) {
+    let oponente;
 
-                document.addEventListener('click', function(event) {
-                    if (event.target.classList.contains('jugar')) {
-                        const partidaId = event.target.getAttribute('data-id');
-                        window.location.href = `/partida?id=${partidaId}`;
-                    }
-                });
-            }
-        }   
+    if (partida.jugador1.usuario._id === usuarioId) {
+      oponente = partida.jugador2?.usuario?.username || 'Esperando oponente';
+    } else {
+      oponente = partida.jugador1?.usuario?.username || 'Desconocido';
+    }
+
+    const movimientos = partida.Movimientos ? partida.Movimientos.length : '-';
+    const fecha = new Date(partida.fechaInicio).toLocaleDateString();
+
+    if (partida.resultado === 'en_curso') {
+      const tbody = document.querySelector('.curso tbody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${oponente}</td>
+        <td>${movimientos}</td>
+        <td>${fecha}</td>
+        <td><button class="jugar" data-id="${partida._id}">Jugar</button></td>
+      `;
+      tbody.appendChild(tr);
+
+    } else if (
+      partida.resultado === 'esperando_oponente' &&
+      partida.jugador2 &&
+      partida.jugador2.usuario &&
+      partida.jugador2.usuario._id === usuarioId
+    ) {
+      const carrousel = document.querySelector('.carrousel');
+      const card = document.createElement('article');
+      card.classList.add('card_pp');
+      card.innerHTML = `
+        <h2>${oponente}</h2>
+        <button class="jugar" data-id="${partida._id}">Jugar</button>
+      `;
+      carrousel.appendChild(card);
+
+    } else {
+      const tbody = document.querySelector('.historial tbody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${oponente}</td>
+        <td>${partida.resultado}</td>
+        <td>${movimientos}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // Delegación de eventos para todos los botones Jugar
+  document.addEventListener('click', async function (event) {
+    if (event.target.classList.contains('jugar')) {
+      const partidaId = event.target.getAttribute('data-id');
+
+      try {
+        // Cambiar estado a 'en_curso'
+        const res = await fetch(`/api/partida/${partidaId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resultado: 'en_curso' }) // 👈 solo actualiza resultado
+        });
+
+        if (!res.ok) {
+          throw new Error('Error al actualizar el estado de la partida');
+        }
+
+        // Redirigir
+        window.location.href = `/partida?id=${partidaId}`;
+      } catch (error) {
+        console.error('Error:', error);
+        alert('No se pudo comenzar la partida.');
+      }
+    }
+  });
+}
+
         document.addEventListener('DOMContentLoaded', partidas);
     </script>
 </body>
