@@ -8,9 +8,19 @@ const PiezaSchema = new mongoose.Schema({
   color: { type: String, enum: ['blanca', 'negra'], required: true }
 }, { _id: false }); // No necesitamos un _id por cada pieza
 
+const JugadorEnPartidaSchema = new mongoose.Schema({
+  usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+  color: { type: String, enum: ['blanca', 'negra'], required: true }
+}, { _id: false });
+
+const MovimientosSchema = new mongoose.Schema({
+  origen: { type: String, required: true }, // Ejemplo: "e2-e4"
+  destino: { type: String, required: true }, // Ejemplo: "e4
+}, { _id: false });
+
 const PartidaSchema = new mongoose.Schema({
-  jugador1: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
-  jugador2: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', default: null },
+  jugador1: { type: JugadorEnPartidaSchema, required: true },
+  jugador2: { type: JugadorEnPartidaSchema, default: null },
   fechaInicio: { type: Date, default: Date.now },
   resultado: {
     type: String,
@@ -40,7 +50,7 @@ const PartidaSchema = new mongoose.Schema({
       { icono: "♟", fila: 6, col: 6, color: "blanca" }, { icono: "♟", fila: 6, col: 7, color: "blanca" }
     ]
   },
-  cantidadMovimientos: { type: Number, default: 0 }
+  Movimientos: { type: [MovimientosSchema], default: null }
 });
 
 module.exports = mongoose.model('Partida', PartidaSchema);

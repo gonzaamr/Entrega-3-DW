@@ -1,3 +1,5 @@
+let movimientos = []; // global
+
 function getIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get('id'); // devuelve el valor de ?id=xxx
@@ -16,18 +18,21 @@ async function cargarInfoPartida() {
     if (!res.ok) {
       throw new Error('Error al obtener la partida');
     }
-    const data = await res.json();
+    const api= await res.json();
+    const data = api.partida;
+    const usuarioId = api.usuarioId;
     const piezasIniciales = data.tablero;
     document.getElementById('tablero').innerHTML = "";
-    juego(piezasIniciales);
+    movimientos = data.Movimientos || [];
+    const turnoActual = turno(movimientos);
+    actualizarTurnoVisual(turnoActual);
+    juego(piezasIniciales, usuarioId, data);
     console.log(piezasIniciales);
     
   } catch (error) {
     console.error('Error al obtener la partida:', error);
   }
 }
-
-let turnoActual = "blanca";
 
 async function guardar() {
   const piezas = [];
@@ -55,7 +60,7 @@ async function guardar() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ tablero: piezas })
+      body: JSON.stringify({ tablero: piezas, Movimientos: movimientos })
     });
 
     if (!res.ok) {
@@ -70,12 +75,15 @@ async function guardar() {
 }
 
 
-function turno() {
-  return turnoActual;
-};
+function turno(movimientos) {
+  if (!Array.isArray(movimientos) || movimientos.length % 2 === 0) {
+    return "blanca";
+  } else {
+    return "negra";
+  }
+}
 
-function actualizarTurnoVisual() {
-  const turnoActual = turno();
+function actualizarTurnoVisual(turnoActual) {
   const playerSpan = document.querySelector(".player");
   const cuadroBlancas = document.querySelector(".c1");
   const cuadroNegras = document.querySelector(".c2");
@@ -89,9 +97,14 @@ function actualizarTurnoVisual() {
     cuadroBlancas.classList.remove("activo");
     cuadroNegras.classList.add("activo");
   }
-};
+}
 
-function juego(piezasIniciales){
+function coordenadaAlgebraica(fila, col) {
+  const letras = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  return letras[col] + (8 - fila);
+}
+
+function juego(piezasIniciales, cookie, info) {
   for (let fila = 0; fila < 8; fila++) {
     for (let col = 0; col < 8; col++) {
       const casilla = document.createElement("div");
@@ -112,18 +125,34 @@ function juego(piezasIniciales){
          const piezaId = e.dataTransfer.getData("text/plain");
       //   const casillaOrigenId = e.dataTransfer.getData("origen");
       //   const casillaDestinoId = e.currentTarget.id;
-         const pieza = document.getElementById(piezaId);
-         const colorCSS = getComputedStyle(pieza).color;
-         const colorPieza = colorCSS === 'rgb(255, 255, 255)' ? 'blanca' : 'negra';
-         if (colorPieza !== turno()) {
-           alert(`¡Es turno de las ${turno()}s!`);
-           casilla.style.transform = "scale(1)";
-           return; 
-         }
+        const pieza = document.getElementById(piezaId);
+        const colorCSS = getComputedStyle(pieza).color;
+        const colorPieza = colorCSS === 'rgb(255, 255, 255)' ? 'blanca' : 'negra';
+        const turnoActual = turno(movimientos);
+          if (colorPieza !== turnoActual) {
+            alert(`¡Es turno de las ${turnoActual}s!`);
+            casilla.style.transform = "scale(1)";
+            return;
+          }
       //   const [, filaOrigen, colOrigen] = casillaOrigenId.split("-");
       //   const [, filaDestino, colDestino] = casillaDestinoId.split("-");
       //   const piezaObj = piezasDesdeLocalStorage.find(p => p.fila == filaOrigen && p.col == colOrigen && p.icono == pieza.textContent) || { icono: pieza.textContent, color: colorPieza };
          if (e.currentTarget.children.length === 0 ){
+          // Simular movimiento para el cambio de turno
+          
+          const origenId = pieza.parentElement.id; // e.g., "casilla-6-4"
+          const destinoId = casilla.id;            // e.g., "casilla-4-4"
+
+          const [, filaOrigen, colOrigen] = origenId.split("-").map(Number);
+          const [, filaDestino, colDestino] = destinoId.split("-").map(Number);
+
+          const origen = coordenadaAlgebraica(filaOrigen, colOrigen);
+          const destino = coordenadaAlgebraica(filaDestino, colDestino);
+          e.currentTarget.appendChild(pieza);
+          movimientos.push({ origen, destino});
+          actualizarTurnoVisual(turno(movimientos));
+          guardar();
+
       //     if (e.currentTarget.children.length === 1) {
       //       const capturada = e.currentTarget.querySelector('.pieza');
       //       if (capturada) {
@@ -133,9 +162,7 @@ function juego(piezasIniciales){
       //         capturada.remove(); 
       //       }
       //     }
-            e.currentTarget.appendChild(pieza);
-            turnoActual = turnoActual === "blanca" ? "negra" : "blanca";
-            actualizarTurnoVisual();
+            
       //     if (casillaOrigenId !== casillaDestinoId) {
       //       const mov = {
       //         origen: `${parseInt(filaOrigen)}-${parseInt(colOrigen)}`,
@@ -151,13 +178,15 @@ function juego(piezasIniciales){
       //       actualizarTurnoVisual();
       //       console.log(movimientos);
       //     }
-           guardar();
          }
          else{
            console.log("Ya hay una pieza aquí");
          }
          casilla.style.transform = "scale(1)";
       });
+
+      
+
       const piezaData = piezasIniciales.find(p => p.fila === fila && p.col === col);
       if (piezaData) {
         const pieza = document.createElement("div");
@@ -166,10 +195,19 @@ function juego(piezasIniciales){
         pieza.setAttribute("draggable", "true");
         pieza.id = `pieza-${fila}-${col}`;
         pieza.style.color = piezaData.color === "blanca" ? "white" : "black";
-        pieza.addEventListener("dragstart", e => {
+          pieza.addEventListener("dragstart", e => {
+          const colorCSS = getComputedStyle(pieza).color;
+          const colorPieza = colorCSS === 'rgb(255, 255, 255)' ? 'blanca' : 'negra';
+          const miColor = cookie === info.jugador1.usuario  ? info.jugador1.color : info.jugador2.color;
+          if (colorPieza !== miColor) {
+            e.preventDefault();
+            console.log("No puedes mover piezas del oponente.");
+            return;
+          }
           e.dataTransfer.setData("text/plain", e.target.id);
           e.dataTransfer.setData("origen", e.target.parentElement.id);
         });
+
         casilla.appendChild(pieza);
       }
       tablero.appendChild(casilla);

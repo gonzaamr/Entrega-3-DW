@@ -177,28 +177,63 @@
             }
         }
 
-        async function crearNuevaPartida(){
-            try{
+        async function crearNuevaPartida(colorElegido) {
+            try {
                 const res = await fetch('/api/crear-partida', {
-                    method: 'POST',
-                    credentials: 'include'
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ color: colorElegido })
                 });
                 if (!res.ok) {
-                    throw new Error('Error al crear la partida');
+                throw new Error('Error al crear la partida');
                 }
                 const data = await res.json();
                 window.location.href = `/partida?id=${data.partidaId}`;
-            }  catch (error) {
+            } catch (error) {
                 console.error('Error al crear la partida:', error);
             }
         }
 
-        document.querySelector('.online').addEventListener('click', crearNuevaPartida);
+
+
+        document.querySelector('.online').addEventListener('click', () => {
+            document.querySelector(".partida").textContent = "";
+
+            const contenedorBotones = document.createElement("div");
+            contenedorBotones.classList.add("cb");
+
+            const titulo = document.createElement("h2");
+            titulo.classList.add("elige-color");
+            titulo.textContent = "Elige el color de tus piezas";
+
+            const botonBlanca = document.createElement("button");
+            botonBlanca.classList.add("decision", "blanca");
+            botonBlanca.textContent = "Blancas";
+
+            const botonNegra = document.createElement("button");
+            botonNegra.classList.add("decision", "negra");
+            botonNegra.textContent = "Negras";
+
+            // Agregar botones al contenedor
+            const contenedor = document.querySelector(".partida");
+            contenedor.appendChild(titulo);
+            contenedorBotones.appendChild(botonBlanca);
+            contenedorBotones.appendChild(botonNegra);
+            contenedor.appendChild(contenedorBotones);
+
+            // Ahora sí puedes añadirles eventos porque ya existen en el DOM
+            botonBlanca.addEventListener("click", () => crearNuevaPartida("blanca"));
+            botonNegra.addEventListener("click", () => crearNuevaPartida("negra"));
+        });
+
 
         function mostrarPartidas(partidas) {  
             for (const partida of partidas) {
-                const jugador = partida.jugador2 ? partida.jugador2.username : 'Desconocido';
-                const movimientos = partida.movimientos || '-';
+                const jugador = partida.jugador2 && partida.jugador2.usuario ? partida.jugador2.usuario.username : 'Esperando oponente';
+                const movimientos = partida.Movimientos ? partida.Movimientos.length : '-';
                 const fecha = new Date(partida.fechaInicio).toLocaleDateString();
                 const tr = document.createElement('tr');
                 let tbody;
@@ -215,10 +250,17 @@
                     tr.innerHTML = `
                         <td>${jugador}</td>
                         <td>${partida.resultado}</td>
-                        <td>${movimientos}</td>
+                        <button>${movimientos}</button>
                     `; 
                 }   
                 tbody.appendChild(tr);
+
+                document.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('jugar')) {
+                        const partidaId = event.target.getAttribute('data-id');
+                        window.location.href = `/partida?id=${partidaId}`;
+                    }
+                });
             }
         }   
         document.addEventListener('DOMContentLoaded', partidas);

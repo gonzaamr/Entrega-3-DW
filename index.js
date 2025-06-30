@@ -81,31 +81,59 @@ app.get('/pp', authMiddleware, async (req, res) => {
 }); 
 
 app.get('/api/info-partidas', authMiddleware, async (req, res) => {
-  const usuarioId = req.cookies.usuario_id;
-  const partidas = await Partida.find({
-    $or: [{ jugador1: usuarioId }, { jugador2: usuarioId }]
-  }).populate('jugador1 jugador2');
-  res.json(partidas);    
+  try {
+    const usuarioId = req.cookies.usuario_id;
+
+    const partidas = await Partida.find({
+      $or: [
+        { 'jugador1.usuario': usuarioId },
+        { 'jugador2.usuario': usuarioId }
+      ]
+    }).populate('jugador1.usuario jugador2.usuario');
+
+    res.json(partidas);
+  } catch (err) {
+    console.error('Error en /api/info-partidas:', err);
+    res.status(500).json({ error: 'Error interno al obtener las partidas' });
+  }
 });
+
 
 app.get('/api/partida/:id', authMiddleware, async (req, res) => {
   const partidaId = req.params.id;
+  const usuarioId = req.cookies.usuario_id;
   const partida = await Partida.findById(partidaId).populate('jugador1 jugador2');
   
   if (!partida) {
     return res.status(404).send('Partida no encontrada');
   }
 
-  res.json(partida);
+  res.json({partida, usuarioId});
 });
 
 app.post('/api/crear-partida', authMiddleware, async (req, res) => {
-  const usuarioId = req.cookies.usuario_id;
-  const partida = await Partida.create({
-    jugador1 : usuarioId,
-    resultado: 'esperando_oponente'
-  });
-  res.json({ partidaId: partida._id });
+  try {
+    const usuarioId = req.cookies.usuario_id;
+    const { color } = req.body;
+
+    if (!['blanca', 'negra'].includes(color)) {
+      return res.status(400).json({ error: 'Color inválido' });
+    }
+
+    const partida = await Partida.create({
+      jugador1: {
+        usuario: usuarioId,
+        color: color
+      },
+      resultado: 'esperando_oponente'
+    });
+
+    res.json({ partidaId: partida._id });
+
+  } catch (err) {
+    console.error('Error al crear la partida:', err);
+    res.status(500).json({ error: 'Error al crear la partida' });
+  }
 });
 
 app.patch('/api/unirse-partida/:id', authMiddleware, async (req, res) => {
@@ -131,7 +159,7 @@ app.patch('/api/unirse-partida/:id', authMiddleware, async (req, res) => {
 // PATCH porque estamos actualizando parcialmente (solo el tablero)
 app.patch('/api/partida/:id', async (req, res) => {
   const { id } = req.params;
-  const { tablero } = req.body;
+  const { tablero, Movimientos } = req.body; // 👈 extraemos también movimientos
 
   if (!Array.isArray(tablero)) {
     return res.status(400).json({ error: 'Formato de tablero inválido' });
@@ -140,12 +168,12 @@ app.patch('/api/partida/:id', async (req, res) => {
   try {
     const partida = await Partida.findByIdAndUpdate(
       id,
-      { tablero: tablero },
+      { tablero, Movimientos }, // 👈 actualizamos ambos
       { new: true }
     );
     if (!partida) return res.status(404).json({ error: 'Partida no encontrada' });
 
-    res.json({ mensaje: 'Tablero actualizado con éxito' });
+    res.json({ mensaje: 'Partida actualizada con éxito' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error del servidor al actualizar la partida' });
@@ -153,11 +181,14 @@ app.patch('/api/partida/:id', async (req, res) => {
 });
 
 
+
 app.delete('/api/borrar-partida/:id', authMiddleware, async (req, res) => {
   const partidaId = req.params.id; 
   await Partida.findByIdAndDelete(partidaId);
   res.status(204).send();
 });
+
+
 
 app.get('/partida',authMiddleware, (req, res)=>{
   res.render('partida',{
