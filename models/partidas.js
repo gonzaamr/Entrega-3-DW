@@ -1,3 +1,4 @@
+const e = require('express');
 const mongoose = require('mongoose');
 
 // Subesquema para una pieza del tablero
@@ -5,7 +6,8 @@ const PiezaSchema = new mongoose.Schema({
   icono: { type: String, required: true },
   fila: { type: Number, required: true },
   col: { type: Number, required: true },
-  color: { type: String, enum: ['blanca', 'negra'], required: true }
+  color: { type: String, enum: ['blanca', 'negra'], required: true },
+  estado: { type: String, enum: ['viva', 'capturada'], default: 'viva'}
 }, { _id: false }); // No necesitamos un _id por cada pieza
 
 const JugadorEnPartidaSchema = new mongoose.Schema({
@@ -14,8 +16,8 @@ const JugadorEnPartidaSchema = new mongoose.Schema({
 }, { _id: false });
 
 const MovimientosSchema = new mongoose.Schema({
-  origen: { type: String, required: true }, // Ejemplo: "e2-e4"
-  destino: { type: String, required: true }, // Ejemplo: "e4
+  origen: { type: String, required: true }, 
+  destino: { type: String, required: true }
 }, { _id: false });
 
 const PartidaSchema = new mongoose.Schema({
@@ -50,7 +52,16 @@ const PartidaSchema = new mongoose.Schema({
       { icono: "♟", fila: 6, col: 6, color: "blanca" }, { icono: "♟", fila: 6, col: 7, color: "blanca" }
     ]
   },
-  Movimientos: { type: [MovimientosSchema], default: null }
+  Movimientos: { type: [MovimientosSchema], default: null },
+  solicitudEmpate: {
+    solicitante: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
+    estado: { type: String, enum: ['pendiente', 'aceptado', 'rechazado'], default: null }
+  },
+  solicitudEliminacion: {
+    solicitante: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
+    estado: { type: String, enum: ['pendiente', 'aceptado', 'rechazado'] },
+    fecha: { type: Date, default: Date.now }
+  }
 });
 
 module.exports = mongoose.model('Partida', PartidaSchema);

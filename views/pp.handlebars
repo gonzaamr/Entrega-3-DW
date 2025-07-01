@@ -14,7 +14,7 @@
                 <span class="box">
                     <img src="/images/peon.png" class="item" alt="Nueva partida">
                     <span>Jugar</span>
-                </span>  
+                </span>     
             </span>
         </label>
         <label for="en-curso" class="boton">
@@ -29,7 +29,7 @@
             <span class="box-container"> <!-- Contenedor adicional -->
                 <span class="box">
                     <img src="/images/punto-de-partida.png" class="item" alt="Partidas publicas">
-                    <span>Partidas publicas</span>
+                    <span>Invitaciones</span>
                 </span>  
             </span>
         </label>
@@ -61,7 +61,7 @@
         <h1>Partida</h1>
         <img src="/images/peon.png" class="itemdetalle" alt="Iniciar">
         <button class="iniciar online">Nueva partida online</button> 
-        <button class="iniciar local">Nueva partida local</button>
+        <a href="/partidaLocal" class="iniciar">Nueva partida local</a>
     </div>
     <div class="contenedor_pp detalle curso">
         <label class="boton volver" for="inicio">⬅ Volver</label>
@@ -74,6 +74,7 @@
                         <th>Movimientos</th>
                         <th>Inicio</th>
                         <th>Entrar</th>
+                        <th>Borrar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -141,150 +142,240 @@
         </div>
     </div>
     <script>
-        async function partidas() {
-            try {
-                const res = await fetch('/api/info-partidas');
-                if (!res.ok) {
-                throw new Error('Error al obtener las partidas');
-                }
-
-                const data = await res.json();
-                mostrarPartidas(data.partidas, data.usuarioId);
-            } catch (error) {
-                console.error('Error al obtener las partidas:', error);
-            }
-        }
-
-
-        async function crearNuevaPartida(colorElegido) {
-            try {
-                const res = await fetch('/api/crear-partida', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ color: colorElegido })
-                });
-                if (!res.ok) {
-                throw new Error('Error al crear la partida');
-                }
-                const data = await res.json();
-                window.location.href = `/partida?id=${data.partidaId}`;
-            } catch (error) {
-                console.error('Error al crear la partida:', error);
-            }
-        }
-
-        document.querySelector('.online').addEventListener('click', () => {
-            document.querySelector(".partida").textContent = "";
-
-            const contenedorBotones = document.createElement("div");
-            contenedorBotones.classList.add("cb");
-
-            const titulo = document.createElement("h2");
-            titulo.classList.add("elige-color");
-            titulo.textContent = "Elige el color de tus piezas";
-
-            const botonBlanca = document.createElement("button");
-            botonBlanca.classList.add("decision", "blanca");
-            botonBlanca.textContent = "Blancas";
-
-            const botonNegra = document.createElement("button");
-            botonNegra.classList.add("decision", "negra");
-            botonNegra.textContent = "Negras";
-
-            // Agregar botones al contenedor
-            const contenedor = document.querySelector(".partida");
-            contenedor.appendChild(titulo);
-            contenedorBotones.appendChild(botonBlanca);
-            contenedorBotones.appendChild(botonNegra);
-            contenedor.appendChild(contenedorBotones);
-
-            // Ahora sí puedes añadirles eventos porque ya existen en el DOM
-            botonBlanca.addEventListener("click", () => crearNuevaPartida("blanca"));
-            botonNegra.addEventListener("click", () => crearNuevaPartida("negra"));
-        });
-
-
-function mostrarPartidas(partidas, usuarioId) {
-  for (const partida of partidas) {
-    let oponente;
-
-    if (partida.jugador1.usuario._id === usuarioId) {
-      oponente = partida.jugador2?.usuario?.username || 'Esperando oponente';
-    } else {
-      oponente = partida.jugador1?.usuario?.username || 'Desconocido';
-    }
-
-    const movimientos = partida.Movimientos ? partida.Movimientos.length : '-';
-    const fecha = new Date(partida.fechaInicio).toLocaleDateString();
-
-    if (partida.resultado === 'en_curso') {
-      const tbody = document.querySelector('.curso tbody');
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${oponente}</td>
-        <td>${movimientos}</td>
-        <td>${fecha}</td>
-        <td><button class="jugar" data-id="${partida._id}">Jugar</button></td>
-      `;
-      tbody.appendChild(tr);
-
-    } else if (
-      partida.resultado === 'esperando_oponente' &&
-      partida.jugador2 &&
-      partida.jugador2.usuario &&
-      partida.jugador2.usuario._id === usuarioId
-    ) {
-      const carrousel = document.querySelector('.carrousel');
-      const card = document.createElement('article');
-      card.classList.add('card_pp');
-      card.innerHTML = `
-        <h2>${oponente}</h2>
-        <button class="jugar" data-id="${partida._id}">Jugar</button>
-      `;
-      carrousel.appendChild(card);
-
-    } else {
-      const tbody = document.querySelector('.historial tbody');
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${oponente}</td>
-        <td>${partida.resultado}</td>
-        <td>${movimientos}</td>
-      `;
-      tbody.appendChild(tr);
-    }
-  }
-
-  // Delegación de eventos para todos los botones Jugar
-  document.addEventListener('click', async function (event) {
-    if (event.target.classList.contains('jugar')) {
-      const partidaId = event.target.getAttribute('data-id');
-
-      try {
-        // Cambiar estado a 'en_curso'
-        const res = await fetch(`/api/partida/${partidaId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ resultado: 'en_curso' }) // 👈 solo actualiza resultado
-        });
-
+        // Función principal para cargar partidas
+async function partidas() {
+    try {
+        const res = await fetch('/api/info-partidas');
         if (!res.ok) {
-          throw new Error('Error al actualizar el estado de la partida');
+            throw new Error('Error al obtener las partidas');
         }
-
-        // Redirigir
-        window.location.href = `/partida?id=${partidaId}`;
-      } catch (error) {
-        console.error('Error:', error);
-        alert('No se pudo comenzar la partida.');
-      }
+        const data = await res.json();
+        mostrarPartidas(data.partidas, data.usuarioId);
+    } catch (error) {
+        console.error('Error al obtener las partidas:', error);
     }
-  });
 }
 
-        document.addEventListener('DOMContentLoaded', partidas);
+// Función para crear nueva partida
+async function crearNuevaPartida(colorElegido) {
+    try {
+        const res = await fetch('/api/crear-partida', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ color: colorElegido })
+        });
+        if (!res.ok) {
+            throw new Error('Error al crear la partida');
+        }
+        const data = await res.json();
+        window.location.href = `/partida?id=${data.partidaId}`;
+    } catch (error) {
+        console.error('Error al crear la partida:', error);
+    }
+}
+
+// Configuración del botón para nueva partida online
+document.querySelector('.online').addEventListener('click', () => {
+    document.querySelector(".partida").textContent = "";
+
+    const contenedorBotones = document.createElement("div");
+    contenedorBotones.classList.add("cb");
+
+    const titulo = document.createElement("h2");
+    titulo.classList.add("elige-color");
+    titulo.textContent = "Elige el color de tus piezas";
+
+    const botonBlanca = document.createElement("button");
+    botonBlanca.classList.add("decision", "blanca");
+    botonBlanca.textContent = "Blancas";
+
+    const botonNegra = document.createElement("button");
+    botonNegra.classList.add("decision", "negra");
+    botonNegra.textContent = "Negras";
+
+    const contenedor = document.querySelector(".partida");
+    contenedor.appendChild(titulo);
+    contenedorBotones.appendChild(botonBlanca);
+    contenedorBotones.appendChild(botonNegra);
+    contenedor.appendChild(contenedorBotones);
+
+    botonBlanca.addEventListener("click", () => crearNuevaPartida("blanca"));
+    botonNegra.addEventListener("click", () => crearNuevaPartida("negra"));
+});
+
+// Función para mostrar partidas en la interfaz
+function mostrarPartidas(partidas, usuarioId) {
+    // Limpiar tablas primero
+    document.querySelector('.curso tbody').innerHTML = '';
+    document.querySelector('.carrousel').innerHTML = '';
+    document.querySelector('.historial tbody').innerHTML = '';
+
+    for (const partida of partidas) {
+        let oponente;
+        const esJugador1 = partida.jugador1.usuario._id === usuarioId;
+        const esJugador2 = partida.jugador2?.usuario?._id === usuarioId;
+
+        if (esJugador1) {
+            oponente = partida.jugador2?.usuario?.username || 'Esperando oponente';
+        } else {
+            oponente = partida.jugador1?.usuario?.username || 'Desconocido';
+        }
+
+        const movimientos = partida.Movimientos ? partida.Movimientos.length : '-';
+        const fecha = new Date(partida.fechaInicio).toLocaleDateString();
+
+        if (partida.resultado === 'en_curso') {
+            const tbody = document.querySelector('.curso tbody');
+            const tr = document.createElement('tr');
+            
+            let botonEliminar = '';
+            if (esJugador1) {
+                botonEliminar = `<td><button class="borrar" data-id="${partida._id}">Borrar</button></td>`;
+            } else if (esJugador2) {
+                botonEliminar = `<td><button class="solicitar-eliminar" data-id="${partida._id}">Solicitar Eliminar</button></td>`;
+            } else {
+                botonEliminar = '<td></td>';
+            }
+
+            tr.innerHTML = `
+                <td>${oponente}</td>
+                <td>${movimientos}</td>
+                <td>${fecha}</td>
+                <td><button class="jugar" data-id="${partida._id}">Jugar</button></td>
+                ${botonEliminar}
+            `;
+            tbody.appendChild(tr);
+
+        } else if (partida.resultado === 'esperando_oponente' && esJugador2) {
+            const carrousel = document.querySelector('.carrousel');
+            const card = document.createElement('article');
+            card.classList.add('card_pp');
+            card.innerHTML = `
+                <h2>${oponente}</h2>
+                <button class="jugar" data-id="${partida._id}">Jugar</button>
+            `;
+            carrousel.appendChild(card);
+
+        } else if (['jugador1', 'jugador2', 'empate'].includes(partida.resultado)) {
+            const tbody = document.querySelector('.historial tbody');
+            const tr = document.createElement('tr');
+            const ganador = partida.resultado === 'empate' ? 'Empate' :
+               (partida.jugador1.usuario._id === usuarioId && partida.resultado === 'jugador1') || 
+               (partida.jugador2?.usuario?._id === usuarioId && partida.resultado === 'jugador2') ? 'Ganaste' : 'Perdiste';
+                            
+            tr.innerHTML = `
+                <td>${oponente}</td>
+                <td>${ganador}</td>
+                <td>${movimientos}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+    }
+}
+
+// Función para verificar solicitudes de eliminación
+function iniciarVerificacionEliminacion() {
+    setInterval(async () => {
+        try {
+            const res = await fetch('/api/info-partidas');
+            if (!res.ok) return;
+            
+            const data = await res.json();
+            const partidas = data.partidas || [];
+            
+            // Filtrar partidas donde:
+            // 1. El usuario es el jugador1 (creador)
+            // 2. Hay solicitud pendiente
+            // 3. El solicitante NO es el usuario actual (es decir, es el jugador2)
+            const partidasConSolicitud = partidas.filter(p => 
+                p.jugador1.usuario._id === data.usuarioId && 
+                p.solicitudEliminacion?.estado === 'pendiente' &&
+                p.solicitudEliminacion.solicitante !== data.usuarioId
+            );
+
+            for (const partida of partidasConSolicitud) {
+                const oponente = partida.jugador2?.usuario?.username || 'Oponente';
+                if (confirm(`${oponente} solicita eliminar la partida. ¿Aceptas?`)) {
+                    await fetch(`/api/partida/${partida._id}/responder-eliminacion`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ aceptar: true })
+                    });
+                    alert('Partida eliminada por acuerdo mutuo');
+                    window.location.reload();
+                } else {
+                    await fetch(`/api/partida/${partida._id}/responder-eliminacion`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ aceptar: false })
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error verificando eliminación:', error);
+        }
+    }, 10000);
+}
+
+// Manejador de eventos global para botones
+document.addEventListener('click', async function(event) {
+    const partidaId = event.target.getAttribute('data-id');
+    if (!partidaId) return;
+    
+    // Botón Jugar
+    if (event.target.classList.contains('jugar')) {
+        try {
+            const res = await fetch(`/api/partida/${partidaId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resultado: 'en_curso' })
+            });
+            if (!res.ok) throw new Error('Error al actualizar partida');
+            window.location.href = `/partida?id=${partidaId}`;
+        } catch (error) {
+            alert(error.message || 'Error al comenzar partida');
+        }
+    }
+    
+    // Botón Borrar (jugador1)
+    else if (event.target.classList.contains('borrar')) {
+        if (!confirm('¿Eliminar esta partida permanentemente?')) return;
+        
+        try {
+            const res = await fetch(`/api/borrar-partida/${partidaId}`, {
+                method: 'DELETE'
+            });
+            if (!res.ok) throw new Error('Error al eliminar partida');
+            event.target.closest('tr').remove();
+            alert('Partida eliminada');
+        } catch (error) {
+            alert(error.message || 'Error al eliminar partida');
+        }
+    }
+    
+    // Botón Solicitar Eliminar (jugador2)
+    else if (event.target.classList.contains('solicitar-eliminar')) {
+        if (!confirm('¿Solicitar eliminación de esta partida? El creador deberá aceptar.')) return;
+        
+        try {
+            const res = await fetch(`/api/partida/${partidaId}/solicitar-eliminacion`, {
+                method: 'POST'
+            });
+            if (!res.ok) throw new Error('Error al enviar solicitud');
+            alert('Solicitud enviada. Esperando respuesta del creador.');
+        } catch (error) {
+            alert(error.message || 'Error al solicitar eliminación');
+        }
+    }
+});
+
+// Inicialización cuando la página carga
+document.addEventListener('DOMContentLoaded', () => {
+    partidas();
+    iniciarVerificacionEliminacion();
+});
     </script>
 </body>

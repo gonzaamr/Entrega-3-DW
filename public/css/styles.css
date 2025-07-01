@@ -480,7 +480,7 @@ tr:hover {
   margin-bottom: 20px;;
 }
 
-.jugar{
+.jugar, .borrar, .solicitar-eliminar{
   width:100%;
   height: 30px;
   background: #fff;
@@ -489,7 +489,7 @@ tr:hover {
   border-radius: 40px;
   box-shadow: 0 0 10px rgba(0, 0, 0, .1);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   color: #333;
   font-weight: 600;
   margin-top: 30px;
@@ -497,7 +497,8 @@ tr:hover {
   margin: 0 auto;
 }
 
-.jugar:hover {
+
+.jugar:hover, .borrar:hover, .solicitar-eliminar:hover {
   transform: scale(1.05);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
@@ -1159,6 +1160,45 @@ h1{
 
 .movimientos{
   color: white;
+} 
+
+.detalle.curso{
+  width: 600px;
+}
+
+.invitacion, .enviar-invitacion {
+  position: fixed; /* Fijo en la pantalla */
+  left: 50%; /* Centrado horizontal */
+  transform: translateX(-50%); /* Ajuste fino para centrar */
+  z-index: 1000; /* Por encima de todo */
+  background: white;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.invitacion {
+  top: 40%; /* Posición vertical del input */
+  width: 250px;
+}
+
+.enviar-invitacion {
+  top: 50%; /* Posición vertical del botón (debajo del input) */
+  cursor: pointer;
+}
+
+/* Fondo semitransparente para modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999; /* Debajo del modal pero encima del resto */
 }
 
 #m1, #m2{
